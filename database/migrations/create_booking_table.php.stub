@@ -1,0 +1,35 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        Schema::create('bookings', function (Blueprint $table) {
+            $table->id();
+            $table->uuidMorphs('bookable');
+            $table->dateTime('start_time');
+            $table->dateTime('end_time');
+            $table->string('status')->default('pending'); // pending, confirmed, cancelled
+            $table->dateTime('expires_at')->nullable();
+            $table->uuidMorphs('booked_by');
+            $table->text('notes')->nullable();
+            $table->timestamps();
+
+            // Index for faster queries
+            $table->index(['status', 'start_time', 'end_time']);
+            $table->index('expires_at');
+
+            // Note: Since we're using uuidMorphs for booked_by, we don't need a foreign key constraint
+            // as it's a polymorphic relationship that can reference any model
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('bookings');
+    }
+};
